@@ -1,9 +1,10 @@
 import { BrowserMultiFormatReader, NotFoundException } from "@zxing/library";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function App() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const codeReader = useRef(new BrowserMultiFormatReader());
+  const [data, setData] = useState("");
 
   useEffect(() => {
     const initializeScanner = async () => {
@@ -19,6 +20,7 @@ function App() {
 
       const exactConstraints = {
         video: {
+          facingMode: { exact: "environment" }, // Request the rear camera
           width: { exact: 1920 },
           height: { exact: 1080 },
           frameRate: { ideal: 60, min: 30 },
@@ -26,6 +28,7 @@ function App() {
       };
 
       const fallbackConstraints = {
+        facingMode: { ideal: "environment" }, // Fallback to rear camera if available
         video: {
           width: { min: 1920, ideal: 1920 },
           height: { min: 1080, ideal: 1080 },
@@ -48,6 +51,7 @@ function App() {
           videoRef.current!,
           (result, err) => {
             if (result) {
+              setData(result.getText());
               console.log(result.getText());
             }
             if (err && !(err instanceof NotFoundException)) {
@@ -76,6 +80,7 @@ function App() {
             videoRef.current!,
             (result, err) => {
               if (result) {
+                setData(result.getText());
                 console.log(result.getText());
               }
               if (err && !(err instanceof NotFoundException)) {
@@ -106,6 +111,7 @@ function App() {
   return (
     <>
       <video ref={videoRef} style={{ width: "100%", height: "400px" }}></video>
+      <p>result: {data}</p>
     </>
   );
 }
